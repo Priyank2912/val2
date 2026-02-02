@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Will you be my Valentine?</title>
 
-  <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
@@ -14,7 +13,6 @@
       --bg2: #ffeef6;
       --card: #ffffffcc;
       --yes: #ff3b7a;
-      --yesHover: #ff1f68;
     }
 
     * { box-sizing: border-box; }
@@ -47,22 +45,16 @@
       box-shadow: 0 18px 60px rgba(0,0,0,.15);
     }
 
-    .art {
-      width: min(260px, 80vw);
-      margin: 0 auto 10px;
-      display: block;
-    }
-
     h1 {
       font-size: clamp(26px, 4vw, 44px);
-      margin: 8px 0;
+      margin: 6px 0;
     }
 
     .button-zone {
       position: relative;
       width: min(520px, 92%);
-      height: 160px;
-      margin: 10px auto 0;
+      height: 170px;
+      margin: 16px auto 0;
       touch-action: none;
     }
 
@@ -77,7 +69,6 @@
       border: none;
       cursor: pointer;
       box-shadow: 0 10px 24px rgba(0,0,0,.14);
-      transition: transform .12s ease, background .12s ease;
     }
 
     #yesBtn {
@@ -85,8 +76,6 @@
       background: var(--yes);
       color: white;
     }
-
-    #yesBtn:hover { background: var(--yesHover); }
 
     #noBtn {
       left: 62%;
@@ -100,21 +89,29 @@
       font-weight: 600;
       color: #ff1f68;
       min-height: 18px;
-      animation: pop .25s ease;
     }
 
     .result {
       display: none;
-      margin-top: 18px;
-      animation: pop .35s ease;
+      margin-top: 20px;
+      animation: pop .4s ease;
     }
 
-    .result h2 {
-      font-size: clamp(30px, 4.5vw, 46px);
+    .result img {
+      width: min(320px, 90%);
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.2);
+    }
+
+    .result p {
+      margin-top: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff3b7a;
     }
 
     @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
+      from { transform: scale(.95); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
   </style>
@@ -124,22 +121,6 @@
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-    <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="fur" x1="0" x2="1">
-          <stop offset="0" stop-color="#f7c7a1"/>
-          <stop offset="1" stop-color="#f2a97b"/>
-        </linearGradient>
-      </defs>
-      <path d="M90 120 C90 70 140 40 190 60
-               C240 40 290 70 290 120
-               C290 180 240 210 190 210
-               C140 210 90 180 90 120Z"
-            fill="url(#fur)"/>
-      <circle cx="160" cy="130" r="8"/>
-      <circle cx="220" cy="130" r="8"/>
-    </svg>
-
     <h1>Diyu!!!</h1>
     <h1>Meri Jaan!!!</h1>
     <h1>Will you be my Valentine? 💖</h1>
@@ -153,8 +134,12 @@
     <div class="hint" id="tease"></div>
 
     <section class="result" id="result">
-      <h2>YAY! 🎉</h2>
-      <p>You had no choice anyway 😌💘</p>
+      <!-- 💘 GIF from example repo 💘 -->
+      <img
+        src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
+        alt="Valentine GIF"
+      />
+      <p>YAYYY!! 💘🥰</p>
     </section>
   </main>
 
@@ -162,49 +147,60 @@
     const zone = document.getElementById("zone");
     const yesBtn = document.getElementById("yesBtn");
     const noBtn = document.getElementById("noBtn");
-    const result = document.getElementById("result");
-    const hint = document.getElementById("hint");
     const tease = document.getElementById("tease");
+    const hint = document.getElementById("hint");
+    const result = document.getElementById("result");
 
     const teaseLines = [
       "Why not? 🙂",
-      "Are you serious right now? 😐",
+      "Are you serious? 😐",
       "Come onnn 😏",
       "Still no?? 🥲",
-      "Okay now you're just playing 😤",
-      "I literally made a website for this 😭",
-      "This is destiny 💘",
-      "Just click YES already 😌"
+      "Okay… decision made 😌💘"
     ];
 
     let teaseIndex = 0;
+    let escapeCount = 0;
+    let yesScale = 1;
+    const MAX_ESCAPES = 5;
 
     function updateTease() {
-      tease.textContent = teaseLines[teaseIndex];
-      teaseIndex = Math.min(teaseIndex + 1, teaseLines.length - 1);
+      tease.textContent = teaseLines[Math.min(teaseIndex, teaseLines.length - 1)];
+      teaseIndex++;
     }
 
-    let yesScale = 1;
     function growYes() {
-      yesScale = Math.min(3.5, yesScale + 0.2);
+      yesScale = Math.min(3.2, yesScale + 0.25);
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
-      if (yesScale > 2.5) {
-        yesBtn.style.left = "50%";
-        yesBtn.style.transform = `translate(-50%, -50%) scale(${yesScale})`;
-      }
     }
 
     function moveNo() {
+      escapeCount++;
+      updateTease();
+
+      if (escapeCount >= MAX_ESCAPES) {
+        noBtn.style.display = "none";
+        yesBtn.style.left = "50%";
+        yesBtn.style.top = "50%";
+        yesBtn.style.transform = "translate(-50%, -50%) scale(3)";
+        yesBtn.style.padding = "28px 50px";
+        return;
+      }
+
       const z = zone.getBoundingClientRect();
       const b = noBtn.getBoundingClientRect();
+
       noBtn.style.left = Math.random() * (z.width - b.width) + "px";
-      noBtn.style.top = Math.random() * (z.height - b.height) + "px";
+      noBtn.style.top  = Math.random() * (z.height - b.height) + "px";
+
       growYes();
-      updateTease();
     }
 
     noBtn.addEventListener("mouseenter", moveNo);
-    noBtn.addEventListener("touchstart", e => { e.preventDefault(); moveNo(); });
+    noBtn.addEventListener("touchstart", e => {
+      e.preventDefault();
+      moveNo();
+    });
 
     zone.addEventListener("pointermove", e => {
       const b = noBtn.getBoundingClientRect();
@@ -216,12 +212,6 @@
     });
 
     const confettiCanvas = document.getElementById("confettiCanvas");
-    function resizeConfettiCanvas() {
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-    }
-    resizeConfettiCanvas();
-
     const confettiInstance = confetti.create(confettiCanvas, { resize: true });
 
     yesBtn.addEventListener("click", () => {
@@ -229,7 +219,12 @@
       hint.style.display = "none";
       tease.style.display = "none";
       result.style.display = "block";
-      confettiInstance({ particleCount: 300, spread: 160 });
+
+      confettiInstance({
+        particleCount: 320,
+        spread: 160,
+        origin: { y: 0.6 }
+      });
     });
   </script>
 </body>
